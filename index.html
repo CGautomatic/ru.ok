@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client to Server</title>
+</head>
+<body>
+    <h2>Send Message to Server</h2>
+    <input type="text" id="messageInput" placeholder="Enter message">
+    <button onclick="sendMessage()">Send</button>
+    <p id="status"></p>
+
+    <script>
+        function sendMessage() {
+            const message = document.getElementById("messageInput").value;
+            const status = document.getElementById("status");
+            
+            fetch("https://7ed2-35-229-225-159.ngrok-free.app/send", {  // ใช้ URL ของเซิร์ฟเวอร์คุณ
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                status.innerText = "Server Response: " + data.status;
+            })
+            .catch(error => {
+                status.innerText = "Error: " + error;
+            });
+        }
+    </script>
+</body>
+</html>

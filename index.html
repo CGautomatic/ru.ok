@@ -3,11 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Project</title>
+    <title>Online Radio Station</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            padding: 20px;
+        }
+        .player {
+            max-width: 400px;
+            margin: auto;
+            text-align: center;
+        }
+        .player iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+        }
+        .info {
+            margin-top: 20px;
+        }
+        .queue {
+            margin-top: 20px;
+        }
+        .queue ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .queue li {
+            padding: 10px;
+            background-color: #1e1e1e;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to My Project</h1>
-    <p>Access the service via ngrok:</p>
-    <a href="https://b2a7-34-171-132-243.ngrok-free.app/">Click here to access the service</a>
+    <div class="player">
+        <h1>Online Radio Station</h1>
+        <iframe id="youtube-player" src="" frameborder="0" allowfullscreen></iframe>
+        <div class="info">
+            <p><strong>Now Playing:</strong> <span id="current-song">Loading...</span></p>
+            <p><strong>Time:</strong> <span id="current-time">0:00</span></p>
+        </div>
+        <div class="queue">
+            <h2>Song Queue</h2>
+            <ul id="song-queue"></ul>
+        </div>
+        <input type="text" id="new-song" placeholder="Enter YouTube video ID">
+        <button onclick="addSong()">Add Song</button>
+    </div>
+
+    <script>
+        const SERVER_URL = "https://b2a7-34-171-132-243.ngrok-free.app/"; // Replace with your Ngrok URL
+
+        async function fetchCurrentSong() {
+            const response = await fetch(`${SERVER_URL}/api/current-song`);
+            const data = await response.json();
+            document.getElementById("current-song").innerText = data.title;
+            document.getElementById("current-time").innerText = formatTime(data.time);
+        }
+
+        async function fetchSongQueue() {
+            const response = await fetch(`${SERVER_URL}/api/song-queue`);
+            const data = await response.json();
+            const queueList = document.getElementById("song-queue");
+            queueList.innerHTML = "";
+            data.forEach(song => {
+                const li = document.createElement("li");
+                li.innerText = song.title;
+                queueList.appendChild(li);
+            });
+        }
+
+        async function addSong() {
+            const videoId = document.getElementById("new-song").value;
+            const title = `YouTube Video (${videoId})`;
+            await fetch(`${SERVER_URL}/api/add-song`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title })
+            });
+            document.getElementById("new-song").value = "";
+            fetchSongQueue();
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        setInterval(fetchCurrentSong, 1000);
+        setInterval(fetchSongQueue, 5000);
+    </script>
 </body>
 </html>

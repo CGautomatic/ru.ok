@@ -56,8 +56,10 @@
     </div>
 
     <script>
-        const SERVER_URL = "https://669b-34-171-132-243.ngrok-free.app"; // Replace with your Ngrok URL
+        const SERVER_URL = "https://your-ngrok-url.ngrok.io"; // Replace with your Ngrok URL
+        const socket = io(SERVER_URL);
 
+        // Fetch initial data
         async function fetchCurrentSong() {
             const response = await fetch(`${SERVER_URL}/api/current-song`);
             const data = await response.json();
@@ -68,15 +70,10 @@
         async function fetchSongQueue() {
             const response = await fetch(`${SERVER_URL}/api/song-queue`);
             const data = await response.json();
-            const queueList = document.getElementById("song-queue");
-            queueList.innerHTML = "";
-            data.forEach(song => {
-                const li = document.createElement("li");
-                li.innerText = song.title;
-                queueList.appendChild(li);
-            });
+            updateQueueUI(data);
         }
 
+        // Add song to the queue
         async function addSong() {
             const videoId = document.getElementById("new-song").value;
             const title = `YouTube Video (${videoId})`;
@@ -86,7 +83,26 @@
                 body: JSON.stringify({ title })
             });
             document.getElementById("new-song").value = "";
-            fetchSongQueue();
+        }
+
+        // Update UI when receiving real-time updates
+        socket.on('update_queue', (data) => {
+            document.getElementById("current-song").innerText = data.current_song.title;
+            updateQueueUI(data.queue);
+        });
+
+        socket.on('update_time', (data) => {
+            document.getElementById("current-time").innerText = formatTime(data.time);
+        });
+
+        function updateQueueUI(queue) {
+            const queueList = document.getElementById("song-queue");
+            queueList.innerHTML = "";
+            queue.forEach(song => {
+                const li = document.createElement("li");
+                li.innerText = song.title;
+                queueList.appendChild(li);
+            });
         }
 
         function formatTime(seconds) {
@@ -95,8 +111,10 @@
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
-        setInterval(fetchCurrentSong, 1000);
-        setInterval(fetchSongQueue, 5000);
+        // Initial fetch
+        fetchCurrentSong();
+        fetchSongQueue();
     </script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </body>
 </html>

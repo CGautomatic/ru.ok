@@ -1,110 +1,13 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ทดสอบ YouTube IFrame API</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        #player {
-            width: 100%;
-            height: 400px;
-            margin-top: 20px;
-        }
-        .controls {
-            text-align: center;
-            margin-top: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+    <title>My Project</title>
 </head>
 <body>
-
-    <h1>ทดสอบ YouTube IFrame API</h1>
-
-    <!-- YouTube Player -->
-    <div id="player"></div>
-
-    <!-- Controls -->
-    <div class="controls">
-        <button id="playButton">เล่น</button>
-        <button id="pauseButton">หยุด</button>
-        <button id="nextButton">เพลงถัดไป</button>
-    </div>
-
-    <script>
-        // Load the YouTube IFrame API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        var player;
-        var playlist = [
-            { videoId: '3ORGYZadXBc', title: 'เพลงแรก' }, // เพลงที่ 1
-            { videoId: 'Va1_7cZlnuM', title: 'เพลงที่สอง' }, // เพลงที่ 2
-            { videoId: '2P1po37ztQI', title: 'เพลงที่สาม' }  // เพลงที่ 3
-        ];
-        var currentSongIndex = 0;
-
-        // Initialize the YouTube player
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '400',
-                width: '100%',
-                videoId: playlist[currentSongIndex].videoId,
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-
-        // When the player is ready
-        function onPlayerReady(event) {
-            console.log("Player is ready");
-            document.getElementById('playButton').addEventListener('click', function () {
-                player.playVideo();
-            });
-            document.getElementById('pauseButton').addEventListener('click', function () {
-                player.pauseVideo();
-            });
-            document.getElementById('nextButton').addEventListener('click', function () {
-                playNextSong();
-            });
-        }
-
-        // Handle state changes (e.g., when the video ends)
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.ENDED) {
-                console.log("เพลงจบแล้ว เล่นเพลงถัดไป...");
-                playNextSong();
-            }
-        }
-
-        // Play the next song in the playlist
-        function playNextSong() {
-            currentSongIndex++;
-            if (currentSongIndex >= playlist.length) {
-                currentSongIndex = 0; // Loop back to the first song
-            }
-            const nextSong = playlist[currentSongIndex];
-            console.log(`กำลังเล่นเพลงถัดไป: ${nextSong.title}`);
-            player.loadVideoById(nextSong.videoId);
-        }
-    </script>
-
+    <h1>Welcome to My Project</h1>
+    <p>Access the service via ngrok:</p>
+    <a href="https://your-ngrok-url.ngrok.io">Click here to access the service</a>
 </body>
 </html>

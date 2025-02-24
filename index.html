@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Radio##</title>
+    <title>Online Radio</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,11 +57,18 @@
     </div>
 
     <script>
-        const API_URL = "https://f125-35-234-59-179.ngrok-free.app"; // Replace with your ngrok URL
+        const API_URL = "https://e11d-35-234-59-179.ngrok-free.app"; // Replace with your ngrok URL
 
         async function fetchCurrentSong() {
             try {
                 const response = await fetch(`${API_URL}/current_song`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Invalid content type: Expected JSON");
+                }
                 const data = await response.json();
 
                 // Update the iframe source only if the song has changed
@@ -80,6 +87,13 @@
         async function fetchQueue() {
             try {
                 const response = await fetch(`${API_URL}/queue`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Invalid content type: Expected JSON");
+                }
                 const data = await response.json();
                 const queueList = document.getElementById('queue-list');
                 queueList.innerHTML = '';
@@ -123,6 +137,12 @@
         // Fetch current song and queue every second
         setInterval(fetchCurrentSong, 1000);
         setInterval(fetchQueue, 5000);
+
+        // Initial fetch when the page loads
+        window.onload = () => {
+            fetchCurrentSong();
+            fetchQueue();
+        };
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Radio Station</title>
+    <title>Online Radio</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,11 +12,11 @@
             padding: 20px;
         }
         .player {
-            max-width: 400px;
+            max-width: 600px;
             margin: auto;
             text-align: center;
         }
-        .player iframe {
+        iframe {
             width: 100%;
             height: 200px;
             border: none;
@@ -28,93 +28,74 @@
             margin-top: 20px;
         }
         .queue ul {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
         }
         .queue li {
-            padding: 10px;
-            background-color: #1e1e1e;
-            margin-bottom: 5px;
-            border-radius: 5px;
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
     <div class="player">
-        <h1>Online Radio Station</h1>
-        <iframe id="youtube-player" src="" frameborder="0" allowfullscreen></iframe>
+        <h1>Online Radio</h1>
+        <iframe id="player" src="" allow="autoplay"></iframe>
         <div class="info">
-            <p><strong>Now Playing:</strong> <span id="current-song">Loading...</span></p>
-            <p><strong>Time:</strong> <span id="current-time">0:00</span></p>
+            <p id="song-title">No Song Playing</p>
+            <p id="elapsed-time">Elapsed: 0s</p>
         </div>
         <div class="queue">
-            <h2>Song Queue</h2>
-            <ul id="song-queue"></ul>
+            <h2>Queue</h2>
+            <ul id="queue-list"></ul>
         </div>
-        <input type="text" id="new-song" placeholder="Enter YouTube video ID">
-        <button onclick="addSong()">Add Song</button>
+        <form id="add-song-form">
+            <input type="text" id="song-url" placeholder="YouTube URL" required />
+            <input type="text" id="song-title-input" placeholder="Song Title" required />
+            <button type="submit">Add Song</button>
+        </form>
     </div>
 
     <script>
-        const SERVER_URL = "https://fd88-34-171-132-243.ngrok-free.app/"; // Replace with your Ngrok URL
-        const socket = io(SERVER_URL);
+        const API_URL = "https://e0d9-35-234-59-179.ngrok-free.app"; // Replace with your ngrok URL
 
-        // Fetch initial data
         async function fetchCurrentSong() {
-            const response = await fetch(`${SERVER_URL}/api/current-song`);
+            const response = await fetch(`${API_URL}/current_song`);
             const data = await response.json();
-            document.getElementById("current-song").innerText = data.title;
-            document.getElementById("current-time").innerText = formatTime(data.time);
+            document.getElementById('song-title').innerText = data.title;
+            document.getElementById('elapsed-time').innerText = `Elapsed: ${Math.floor(data.elapsed_time)}s`;
+            document.getElementById('player').src = data.url;
         }
 
-        async function fetchSongQueue() {
-            const response = await fetch(`${SERVER_URL}/api/song-queue`);
+        async function fetchQueue() {
+            const response = await fetch(`${API_URL}/queue`);
             const data = await response.json();
-            updateQueueUI(data);
-        }
-
-        // Add song to the queue
-        async function addSong() {
-            const videoId = document.getElementById("new-song").value;
-            const title = `YouTube Video (${videoId})`;
-            await fetch(`${SERVER_URL}/api/add-song`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title })
-            });
-            document.getElementById("new-song").value = "";
-        }
-
-        // Update UI when receiving real-time updates
-        socket.on('update_queue', (data) => {
-            document.getElementById("current-song").innerText = data.current_song.title;
-            updateQueueUI(data.queue);
-        });
-
-        socket.on('update_time', (data) => {
-            document.getElementById("current-time").innerText = formatTime(data.time);
-        });
-
-        function updateQueueUI(queue) {
-            const queueList = document.getElementById("song-queue");
-            queueList.innerHTML = "";
-            queue.forEach(song => {
-                const li = document.createElement("li");
+            const queueList = document.getElementById('queue-list');
+            queueList.innerHTML = '';
+            data.forEach(song => {
+                const li = document.createElement('li');
                 li.innerText = song.title;
                 queueList.appendChild(li);
             });
         }
 
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
+        document.getElementById('add-song-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('song-url').value;
+            const title = document.getElementById('song-title-input').value;
 
-        // Initial fetch
-        fetchCurrentSong();
-        fetchSongQueue();
+            await fetch(`${API_URL}/add_song`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, url, duration: 200 }) // Duration in seconds
+            });
+
+            alert('Song added to queue!');
+            document.getElementById('song-url').value = '';
+            document.getElementById('song-title-input').value = '';
+        });
+
+        setInterval(fetchCurrentSong, 1000);
+        setInterval(fetchQueue, 5000);
     </script>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </body>
 </html>

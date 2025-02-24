@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Radio+</title>
+    <title>Online Radio##</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,7 +18,7 @@
         }
         iframe {
             width: 100%;
-            height: 300px;
+            height: 200px;
             border: none;
         }
         .info {
@@ -57,21 +57,21 @@
     </div>
 
     <script>
-        const API_URL = "https://bdcf-35-234-59-179.ngrok-free.app"; // Replace with your ngrok URL
+        const API_URL = "https://f125-35-234-59-179.ngrok-free.app"; // Replace with your ngrok URL
 
         async function fetchCurrentSong() {
             try {
                 const response = await fetch(`${API_URL}/current_song`);
                 const data = await response.json();
+
+                // Update the iframe source only if the song has changed
+                const player = document.getElementById('player');
+                if (player.src !== data.url) {
+                    player.src = data.url;
+                }
+
                 document.getElementById('song-title').innerText = data.title;
                 document.getElementById('elapsed-time').innerText = `Elapsed: ${Math.floor(data.elapsed_time)}s`;
-                
-                // Update iframe source only if the URL is valid
-                if (data.url && data.url.includes("youtube.com/embed")) {
-                    document.getElementById('player').src = data.url;
-                } else {
-                    document.getElementById('player').src = "";
-                }
             } catch (error) {
                 console.error("Error fetching current song:", error);
             }
@@ -112,13 +112,15 @@
                     document.getElementById('song-title-input').value = '';
                     document.getElementById('song-duration').value = '';
                 } else {
-                    alert('Failed to add song. Please check the URL.');
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.error}`);
                 }
             } catch (error) {
                 console.error("Error adding song:", error);
             }
         });
 
+        // Fetch current song and queue every second
         setInterval(fetchCurrentSong, 1000);
         setInterval(fetchQueue, 5000);
     </script>
